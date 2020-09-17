@@ -3,8 +3,17 @@ from jieba import analyse
 import sys
 
 
+def stopword(sentence):
+    #字符串替换去标点符号
+    words='的地得[’!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~]+，。！？“”《》：、． '
+    for i in words:
+        sentence=sentence.replace(i,'')
+    return sentence 
+
 # 计算jaccard系数
 def jaccrad(essay_source, essay_target):  # essay_source为源文本，essay_target为待比较文本
+    essay_source = stopword(essay_source)
+    essay_target = stopword(essay_target)
     cut1 = [i for i in jieba.cut(essay_source, cut_all=True) if i != '']  # 用Jieba默认精准模式分词
     cut2 = [i for i in jieba.cut(essay_target, cut_all=True) if i != '']
     k1 = int(len(cut1)/5)
@@ -32,10 +41,11 @@ if __name__ == '__main__':
             source = fp.read()
         with open(sys.argv[2], "r", encoding='UTF-8') as fp:
             target = fp.read()
+        sim = round(jaccrad(source, target), 2)
     except Exception as err:
         print(err)
     # 计算相似度并保留两位小数
-    sim = round(jaccrad(source, target), 2)
+    
     try:
         with open(sys.argv[3], "w+", encoding='UTF-8') as fp:
             fp.write(str(sim))
